@@ -1,4 +1,4 @@
-import pytest
+import PyTest
 
 from flask import template_rendered
 
