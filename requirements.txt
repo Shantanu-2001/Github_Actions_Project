@@ -1,2 +1,2 @@
-pytest
+PyTest
 Flask-SQLAlchemy
