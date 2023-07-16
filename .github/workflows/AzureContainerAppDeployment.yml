@@ -13,7 +13,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: dotnet
+        working-directory: data
     steps:
     # checkout the repo
     - name: 'Checkout GitHub Action' 
@@ -28,17 +28,17 @@ jobs:
     
     - uses: azure/docker-login@v1
       with:
-        login-server: cloudquicklabsacr.azurecr.io
+        login-server: employeportal.azurecr.io
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
     - run: |
-        docker build . -t cloudquicklabsacr.azurecr.io/myapp:${{ github.sha }}
-        docker push cloudquicklabsacr.azurecr.io/myapp:${{ github.sha }}     
+        docker build . -t employeportal.azurecr.io/flask-app:${{ github.sha }}
+        docker push employeportal.azurecr.io/flask-app:${{ github.sha }}     
       
     - uses: azure/webapps-deploy@v2
       with:
         app-name: 'CloudQuickLabsWebApp'
-        images: 'cloudquicklabsacr.azurecr.io/myapp:${{ github.sha }}'
+        images: 'employeportal.azurecr.io/flask-app:${{ github.sha }}'
     
     - name: Azure logout
       run: |
