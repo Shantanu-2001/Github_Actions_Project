@@ -10,6 +10,10 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: data  # Set the working directory to "data"
 
     steps:
       - name: Install Azure CLI
@@ -19,7 +23,7 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v2
-      
+
       # Continue with the rest of the workflow steps
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
@@ -27,22 +31,23 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      
+
       - uses: azure/docker-login@v1
         with:
           login-server: employeportal.azurecr.io
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-      
+
       - run: |
-          docker build . -t employeportal.azurecr.io/flask-app:${{ github.sha }}
+          # Use the correct path to the Dockerfile in the "data" folder
+          docker build ./data -t employeportal.azurecr.io/flask-app:${{ github.sha }}
           docker push employeportal.azurecr.io/flask-app:${{ github.sha }}
-      
+
       - uses: azure/webapps-deploy@v2
         with:
           app-name: 'employeeportalapplication'
           images: 'employeportal.azurecr.io/flask-app:${{ github.sha }}'
-      
+
       - name: Azure logout
         run: |
           az logout
