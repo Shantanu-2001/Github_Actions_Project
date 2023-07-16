@@ -4,42 +4,45 @@ on:
   workflow_dispatch:
 
 permissions:
-      id-token: write
-      contents: read
+  id-token: write
+  contents: read
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: data
+
     steps:
-    # checkout the repo
-    - name: 'Checkout GitHub Action' 
-      uses: actions/checkout@main
-    
-    - name: 'Login via Azure CLI'
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-    
-    - uses: azure/docker-login@v1
-      with:
-        login-server: employeportal.azurecr.io
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-    - run: |
-        docker build . -t employeportal.azurecr.io/flask-app:${{ github.sha }}
-        docker push employeportal.azurecr.io/flask-app:${{ github.sha }}     
+      - name: Install Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+        if: runner.os == 'Linux'
+
+      - name: Checkout code
+        uses: actions/checkout@v2
       
-    - uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'employeeportalapplication'
-        images: 'employeportal.azurecr.io/flask-app:${{ github.sha }}'
-    
-    - name: Azure logout
-      run: |
-        az logout
+      # Continue with the rest of the workflow steps
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - uses: azure/docker-login@v1
+        with:
+          login-server: employeportal.azurecr.io
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      
+      - run: |
+          docker build . -t employeportal.azurecr.io/flask-app:${{ github.sha }}
+          docker push employeportal.azurecr.io/flask-app:${{ github.sha }}
+      
+      - uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'employeeportalapplication'
+          images: 'employeportal.azurecr.io/flask-app:${{ github.sha }}'
+      
+      - name: Azure logout
+        run: |
+          az logout
