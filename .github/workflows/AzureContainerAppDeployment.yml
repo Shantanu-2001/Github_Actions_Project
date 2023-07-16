@@ -35,7 +35,7 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - run: |
-          docker build . -t employeportal.azurecr.io/flask-app:${{ github.sha }}
+          docker build ./data -t employeportal.azurecr.io/flask-app:${{ github.sha }}
           docker push employeportal.azurecr.io/flask-app:${{ github.sha }}
 
       - uses: azure/webapps-deploy@v2
