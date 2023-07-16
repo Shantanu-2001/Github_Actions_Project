@@ -10,10 +10,6 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: data  # Set the working directory to "data"
 
     steps:
       - name: Install Azure CLI
@@ -39,8 +35,7 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - run: |
-          # Use the correct path to the Dockerfile in the "data" folder
-          docker build ./data -t employeportal.azurecr.io/flask-app:${{ github.sha }}
+          docker build . -t employeportal.azurecr.io/flask-app:${{ github.sha }}
           docker push employeportal.azurecr.io/flask-app:${{ github.sha }}
 
       - uses: azure/webapps-deploy@v2
